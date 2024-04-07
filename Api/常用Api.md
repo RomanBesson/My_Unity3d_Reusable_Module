@@ -258,7 +258,7 @@ GameObject.Find(string)
 ### 5.4.旋转和移动的函数
 
 ```c#
-[void] Translate(Vector3, Space)    //选择坐标系,按指定的方向移动.
+[void] Translate(Vector3, Space)    //选择坐标系,按指定的方向移动. space(wprld/self)代表参考世界/自身坐标系
 [void] Rotate(Vector3, float)       //沿固定轴向旋转固定角度.
 ```
 
