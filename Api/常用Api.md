@@ -92,6 +92,24 @@ git push -u origin master
 
 
 
+## 5.分支操作
+
+### 5.1.修改要提交的分支
+
+```bash
+git checkout <branch-name>
+```
+
+
+
+### 5.2.合并分支到主分支（前提条件：你现在是主分支）
+
+```
+git merge "你要合并的分支名"
+```
+
+
+
 # Unity_Api
 
 ## 1.Input [输入类]
