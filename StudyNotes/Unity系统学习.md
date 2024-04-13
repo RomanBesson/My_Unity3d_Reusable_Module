@@ -343,4 +343,107 @@ Unity 引擎内有两套内置的物理系统组件，菜单路径位置如下�
 
 这种组合方式没有使用碰撞体组件，也就意味着项目运行之后，“组合 D”不会停
 
-留在“地面”上，而是直接穿透地面进行自由落体运动
+留在“地面”上，而是直接穿透地面进行自由落体运动	
+
+## 3.Resources
+
+### 3.1.基础介绍
+
+Resources [资源]类：主要用途就是资源加载；
+
+在项目工程中，需要手动创建名为“Resources”的文件夹，相关资源存放到该文件夹内，在代码中即可通过 Resources 类相关的 API 实现资源加载。
+
+### 3.2.常用资源类型
+
+- 预制体资源 [Prefab]：GameObject
+- 材质球资源 [Material]：Matirial
+- 音频剪辑资源 [AudioClip]：AudioClip
+- 模型贴图资源 [Texture]：Texture2D
+
+### 3.3.单个资源加载
+
+```c#
+[s][T] Resources.Load<T>(string)
+```
+
+- Load( )是 Resources 类的静态泛型方法, 返回值类型和填写的泛型一致；
+- Load( )参数是字符串类型，填写资源在 Resources 文件夹中的路径；
+  - |--资源在根目录，直接写文件名即可[名称不需要带后缀]，比如：“Cube”；
+  - |--资源在子目录，写“完整路径”，比如：“Player/Cube”；
+- 拼凑出资源在项目中的完整路径：Assets/Resources/ + Player/Cube
+
+### 3.4.多个资源加载
+
+```c#
+[s][T[]] Resources.LoadAll<T>(string)
+```
+
+- LoadAll( )静态泛型方法, 返回值类型和填写的泛型一致，返回数组；
+- Load( )方法是加载单一资源，参数是具体资源的“文件名路径”；
+- LoadAll( )方法是加载多个资源，参数是具体资源的“文件夹路径”，将文件夹内的资源全部加载，返回一个数组格式，文件夹内的资源，保持类型一致
+
+### 例子：资源的加载
+
+```c#
+   private GameObject m_GameObject;    //预制体.
+    private Material m_Material;        //材质球.
+    private AudioClip m_AudioClip;      //音频剪辑.
+    private Texture2D m_Texture2D;      //模型贴图.
+
+    private GameObject[] player;         //多个角色.
+
+
+    void Start()
+    {
+        m_GameObject = Resources.Load<GameObject>("Player/Cube");
+        m_Material = Resources.Load<Material>("ColorA");
+        m_AudioClip = Resources.Load<AudioClip>("ddz");
+        m_Texture2D = Resources.Load<Texture2D>("Line");
+
+        Debug.Log(m_GameObject.name);
+        Debug.Log(m_Material.name);
+        Debug.Log(m_AudioClip.name);
+        Debug.Log(m_Texture2D.name);
+
+        player = Resources.LoadAll<GameObject>("Player");
+        Debug.Log(player.Length);
+        for (int i = 0; i < player.Length; i++)
+        {
+            Debug.Log(player[i].name);
+        }
+
+        
+
+    }
+```
+
+
+
+# UI系统
+
+## 1.文字组件
+
+### 1.1TMP 字体文件
+
+- **字体文件**
+  - Text 组件和 Text TMP 组件，都是用于文字显示，文字显示依赖字体文件；
+    - Text 组件：TTF 格式字体文件； [Windows 系统拷贝字体文件]
+    - Text TMP 组件：SDF 格式的 Asset 字体文件，默认无法显示中文。
+
+- **制作 TMP 字体文件（TMP默认不显示中文）**
+  1. Window --> TextMeshPro --> Font Asset Creator 打开功能面板；
+  2. Source Font File [源字体文件]：支持中文显示的 TTF 字体文件；
+  3. Character Set [字符集]：Custom Characters [自定义字符]；
+  4. Custom Character List [自定义字符列表]：输入你需要显示的中文；
+  5. Render Mode [渲染模式]：SDF； [和 TMP 自带的字体保持类型一致]
+  6. 点击 Generate Font Atlas [生成字体图集]按钮；
+  7. 点击 Save 按钮，将文件存储到指定路径位置；
+  8. 当中英文并存时，会自动生成子物体，调用 TMP 默认的字体显示英文。
+
+## 2.图片组件
+
+### 2.1.导入UI 图片素材
+
+1. 将素材图拖拽导入到 Textures 文件夹中；
+2. Unity 项目工程中的图片，默认用途是“模型贴图”，如果想应用于 UI 界面，需要手动修改图片的属性；
+3. 全选素材图，右侧属性栏参数：Texture Type 修改为 Sprite (2D and UI)，Sprite Mode 修改为 Single，参数修改之后，点击 Apply 按钮。
