@@ -247,7 +247,6 @@ new WaitForSeconds(float)   //延迟等待x秒.
 ```c#
 [s][GameObject] Find(string)   //通过名称查找获取场景内的游戏物体对象.
 [s][GameObject[]] FindGameObjectsWithTag(string)   //Tag标签查找.
-[s][T]Instantiate<T>(GameObject, Vector3, Quaternion) //实例化.
 [s][void] Destroy(Object)         //销毁游戏物体,组件.
 [s][void] Destroy(Object, float) //定时销毁游戏物体,组件.
 ```
@@ -267,6 +266,15 @@ new WaitForSeconds(float)   //延迟等待x秒.
 
 ```c#
 [void] SetActive(bool)          //控制游戏物体显示[true]与隐藏[false].
+```
+
+
+
+### 3.5.实例化生成
+
+```c#
+[s][T]Instantiate<T>(GameObject, Vector3, Quaternion) //实例化.
+[s][T]Instantiate<T>(GameObject, Vector3, Quaternion, Transform) //实例化.最后一个参数指定父物体
 ```
 
 
