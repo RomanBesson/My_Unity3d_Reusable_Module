@@ -2,6 +2,10 @@
 
 # 1.基础组件的认识
 
+## 1.0.组件继承关系图
+
+![1.继承关系](../Img/1.%E7%BB%A7%E6%89%BF%E5%85%B3%E7%B3%BB.png)
+
 
 
 ## 1.1.项目工程文件结构，各个文件夹都是做什么的？
@@ -477,6 +481,309 @@ public class Demo10 : MonoBehaviour
 2. Transform 组件对象方法 Find()可以直接以名称查找子物体，但是不能直接以名称查找**孙物体**(空引用异常)，如果需要查找多层嵌套的子物体，**需要写完整路径**；
 3. Find()方法的“前身”是 **FindChild()方法**(被官方弃用)，两个方法的用途完全一样，如果你使用旧版本的 Unity 引擎，可能看到的就只有 FindChild()方法。
 
+## 1.10.时间，数学运算 & 插值运算
+
+### 1.10.1.Time 时间类
+
+```c#
+[float] Time.time //时间. 
+```
+
+静态只读属性，项目从开始运行到现在的总时长，以秒为单位；
+
+```c#
+[float] Time.deltaTime //增量时间. 
+```
+
+静态只读属性，当前游戏画面渲染完一帧，所需要的时长，以秒为单位；
+
+```c#
+[float] Time.timeScale //时间缩放. 
+```
+
+静态读写属性，控制虚拟游戏世界中的时间流速，可以用来实现游戏暂停；
+
+- 1：时间正常； 
+
+- 0：时间暂停； 
+
+- 0.5：时间 0.5 倍慢放；
+
+### 1.10.2.Mathf 数学类
+
+Mathf“数学类”其实是一个结构体类型，提供了一些基础的数学运算 API, 比如：最大值，最小值，三角函数，角度，弧度...
+
+#### 角度与弧度互相转换
+
+**角度 [Degree]**：两条线段之间的夹角； [变换组件的旋转属性]
+
+**弧度 [Radian]**：弧度也是一个角度单位，1 弧度≈57.3 度 1 度≈0.0174 弧度。
+
+```c#
+[float] Mathf.Deg2Rad //角度转弧度常量. 0.0174. 
+
+[float] Mathf.Rad2Deg //弧度转角度常量. 57.295. 
+```
+
+在项目开发过程中，经常会遇到“角度”与“弧度”互相转换的情况；
+
+- 50 度转弧度：50 * Mathf.Deg2Rad ≈ 0.872
+- 0.75 弧度转角度：0.75 * Mathf.Rad2Deg ≈ 42.97
+
+### 1.10.3.插值运算
+
+确定两个参数 A 和 B，然后从 A 平滑过渡到 B的过程；
+
+```c#
+[s][float] Mathf.Lerp(float a, float b, float t)
+```
+
+**参数说明**：
+
+- **a**：起始值，例如：0；
+
+- **b**：目标值，例如：20；
+- **t**：插值系数，表示 a 和 b 之间的比例，取值范围是 0 ~ 1 之间。
+  - t=0，返回 a 参数的值，t=1，返回 b 参数的值；
+  - t=0.5，返回 a 和 b 的中间值。
+
+- **Lerp**（）插值方法，我们最终使用的是 a 值，b 值是相对固定的，在插值运算的过程中，a 值会逐渐递增[也可能是递减]“变成”b 值，插值运算宣告结束。
+
+**注意：**
+
+- Lerp()插值方法需要**放到 Update 语句块中执行**(一般来说，如果不放进去的话，就执行一次就失去了意义)。
+- 将插值运算的结果**重新存储到 a 中**，再插值的时候就是在新的 a和原有的 b 之间继续插值，a 值才能实现递增。
+- 在插值运算过程中，a 值会逐渐靠近 b 值，当两个值非常近的时候，依然在继续插值，每一次插值的累加步长非常小，但是插值运算不会停止；所以，到达一个**很接近的值的时候要停止插值运算**，之后进行赋值结束。
+- **插值系数一般用一个很小的数值**，这样可以实现 a 值到 b 值之间的平滑过渡，在实际使用过程中，**插值系数经常使用“增量时间”：Time.deltaTime。**
+
+### 1.10.4.插值运算的几个实际应用
+
+#### 单轴向位移和旋转
+
+```c#
+public class CubeLerp : MonoBehaviour
+{
+    private float startPos = 0;
+    private float endPos = 20;
+
+    private float startRot = 0;
+    private float endRot = 50;
+
+    private float tPos = 0;
+    private float tRot = 0;
+
+    private Vector3 startVector3;
+    private Vector3 endVector3;
+
+    private Quaternion startQua;
+    private Quaternion endQua;
+
+    private Transform m_Transform;
+    private Transform endCube;
+
+    void Start()
+    {
+        m_Transform = gameObject.GetComponent<Transform>();
+        endCube = GameObject.Find("EndCube").GetComponent<Transform>();
+
+        startQua = m_Transform.rotation;
+        endQua = endCube.rotation;
+    }
+
+
+    void Update()
+    {
+        //单向位移
+        MoveLerp();
+        //单向旋转
+        RotationLerp();
+    }
+
+
+    private void MoveLerp()
+    {
+        if (startPos < 19.7f)
+        {
+            startPos = Mathf.Lerp(startPos, endPos, Time.deltaTime);
+            m_Transform.position = new Vector3(0, 0, startPos);
+        }
+
+    }
+
+
+    private void RotationLerp()
+    {
+        if (startRot < 49.5f)
+        {
+            startRot = Mathf.Lerp(startRot, endRot, Time.deltaTime);
+            m_Transform.rotation = Quaternion.Euler(new Vector3(0, 0, startRot));
+        }
+    }
+
+
+
+}
+```
+
+**上面演示的“单轴向位移”和“单轴向旋转”两个效果，存在两个共有的问题：**
+
+-  插值运算前面快，后面慢； [插值系数固定，前面肯定快，后面肯定慢。]
+- 无法精准的插值到结束值； [临界值的 if 判断语句，停止继续插值。]
+
+ 能不能让插值运算匀速插值，且“精准”的插值到结束值呢？？
+
+**优化版：**
+
+```c#
+public class CubeLerp : MonoBehaviour
+{
+    private float startPos = 0;
+    private float endPos = 20;
+
+    private float startRot = 0;
+    private float endRot = 50;
+
+    private float tPos = 0;
+    private float tRot = 0;
+
+    private Vector3 startVector3;
+    private Vector3 endVector3;
+
+    private Quaternion startQua;
+    private Quaternion endQua;
+
+    private Transform m_Transform;
+    private Transform endCube;
+
+    void Start()
+    {
+        m_Transform = gameObject.GetComponent<Transform>();
+        endCube = GameObject.Find("EndCube").GetComponent<Transform>();
+
+        startQua = m_Transform.rotation;
+        endQua = endCube.rotation;
+    }
+
+
+    void Update()
+    {
+        //单向位移
+        MoveLerp();
+        //单向旋转
+        RotationLerp();
+    }
+
+
+    private void MoveLerp()
+    {
+       if(tPos < 1.0f)
+        {
+            tPos += 0.5f * Time.deltaTime;
+            m_Transform.position = new Vector3(0, 0, Mathf.Lerp(startPos, endPos, tPos));
+
+        }
+
+    }
+
+
+    private void RotationLerp()
+    {
+       if (tRot < 1.0f)
+        {
+            tRot += 0.5f * Time.deltaTime;
+            m_Transform.rotation = Quaternion.Euler(new Vector3(0, 0, Mathf.Lerp(startRot, endRot, tRot)));
+
+        }
+    }
+
+}
+```
+
+1. 每次插值运算完毕，将插值结果存入到起始值中，第二次，在新的起始值和固定结束值之间继续插值，且重复上方操作，改进方案是：起始值和结束值都固定不变，我们改变插值系数；
+2. 插值系数初始值为 0，在 Update 语句块中，每帧累加 Time.deltaTime,插值系数每帧都会“变大”，起始值和结束值是固定不变的，但是插值系数在慢慢变大，一样可以实现插值结果的变大。
+
+#### 其他插值 API
+
+1. 借助于 Mathf.Lerp()方法，我们可以实现单轴向上的位移动画和旋转动画，但是局限性很大，比如：[3，8, 10]插值移动到[34, 19, 78]；
+2. Unity 引擎中，很多类都有自己专用的 Lerp()插值运算方法，接下来我们就演示“向量插值”和“四元数插值”。
+
+```c#
+[s][Vector3] Vector3.Lerp(a, b, float t)//向量插值
+[s][Quaternion] Quaternion.Lerp(a, b, float t)//四元数插值
+```
+
+#### 示例
+
+```c#
+public class CubeLerp : MonoBehaviour
+{
+    private float startPos = 0;
+    private float endPos = 20;
+
+    private float startRot = 0;
+    private float endRot = 50;
+
+    private float tPos = 0;
+    private float tRot = 0;
+
+    private Vector3 startVector3;
+    private Vector3 endVector3;
+
+    private Quaternion startQua;
+    private Quaternion endQua;
+
+    private Transform m_Transform;
+    private Transform endCube;
+
+    void Start()
+    {
+        m_Transform = gameObject.GetComponent<Transform>();
+        endCube = GameObject.Find("EndCube").GetComponent<Transform>();
+
+        startVector3 = m_Transform.position;
+        endVector3 = endCube.position;
+
+        startQua = m_Transform.rotation;
+        endQua = endCube.rotation;
+    }
+
+
+    void Update()
+    {
+        MoveLerp();
+        RotationLerp();
+    }
+
+
+    private void MoveLerp()
+    {
+
+        if(tPos < 1.0f)
+        {
+            tPos += 0.5f * Time.deltaTime;
+            m_Transform.position = Vector3.Lerp(startVector3, endVector3, tPos);
+
+        }
+
+    }
+
+
+    private void RotationLerp()
+    {
+        if (tRot < 1.0f)
+        {
+            tRot += 0.5f * Time.deltaTime;
+            m_Transform.rotation = Quaternion.Lerp(startQua, endQua, tRot);
+        }
+
+
+    }
+
+}
+```
+
+
+
 # 2.物理系统的初步认识
 
 Unity 引擎内有两套内置的物理系统组件，菜单路径位置如下：
@@ -854,3 +1161,4 @@ float 参数：延迟的时间，单位是秒。
 1. 协程在开启时，可以动态的传递参数，**Invoke 只能是无参方法**；
 2. **协程方法体内，可以多次延迟**，Invoke 只能在方法开启时延迟；
 3. **Invoke 能实现的效果，协程都能实现**，可以理解成一个是免费版，一个是 SVIP付费加强版，在项目实际开发过程中，按需使用即可。
+
