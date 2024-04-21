@@ -1026,6 +1026,80 @@ Unity 引擎内有两套内置的物理系统组件，菜单路径位置如下�
 
 
 
+## 2.4.角色控制器（Character Controller）
+
+### 2.4.1.常用Api
+
+1.  **SimpleMove（Vector3）：简单移动**
+
+   以一定的速度移动角色，会自动应用重力。[角色控制器不是刚体，但是具备刚体的一些属性]
+
+2. **Move（Vector3）：移动**
+
+   更为复杂的一种运动，每次都绝对运动，不会应用重力。
+
+3. **OnControllerColliderHit（ControllerColliderHit hit）**：可以通过 hit 获取到角色碰撞器碰撞到的物体的信息。
+
+### 2.4.2.相关属性
+
+1. **Slope Limit**
+
+   斜率限制，控制角色最大的爬坡斜度。[演示：角色爬坡]
+
+2. **Step Offset**
+
+   台阶高度，控制角色可以迈上最大的台阶高度。[演示：角色上台阶]
+
+3. **Skin Width [默认即可]**
+
+   皮肤厚度，在角色的外围包裹着一层“皮肤”，设置这层皮肤的厚度。数值调大，最明显的就是角色和地面之间的间距变大，也就是角色皮肤变厚了。
+
+4. **Min Move Distance [默认即可]**
+
+   最小移动距离，默认是 0.001，也就是 1 毫米。如果该数值调大，但代码中单位移动速度很慢，角色就不会动。
+
+5. **Center/Radius/Height**角色控制器组件在 Scene 面板中体现为一个“胶囊碰撞器”的形状。
+
+**Center**：控制中心点的位置；
+
+**Radius**：控制半径；
+
+**Height**：控制高度。
+
+### 实例使用
+
+```c#
+using UnityEngine;
+using System.Collections;
+
+public class Player : MonoBehaviour {
+
+    private CharacterController m_CC;
+
+	void Start () {
+        m_CC = gameObject.GetComponent<CharacterController>();
+        //m_CC.slopeLimit = 10;
+	}
+	
+	void Update () {
+        //Debug.Log(Input.GetAxis("Horizontal"));
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        m_CC.SimpleMove(new Vector3(horizontal, 0, vertical) * 3);
+        //m_CC.Move(new Vector3(horizontal, 0, vertical) * 0.3f);
+	}
+
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        Debug.Log(hit.gameObject.name);
+    }
+}
+
+```
+
+
+
 # 3.UI系统
 
 ## 3.1.文字组件

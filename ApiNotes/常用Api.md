@@ -495,3 +495,18 @@ RaycastHit                        //结构体,存放物理射线碰撞信息.
 [s][float] Lerp(float a, float b, float t)  //数学类插值运算.
 ```
 
+## 22.Character Controller
+
+### 移动
+
+```c#
+ SimpleMove（Vector3）：//简单移动
+ Move（Vector3）：移动 //更为复杂的一种运动，每次都绝对运动，不会应用重力。
+```
+
+## 23.Iput控制面板上的操作
+
+```c#
+[float]Input.GetAxis（“轴向名称”）; //取得轴向的值
+```
+
