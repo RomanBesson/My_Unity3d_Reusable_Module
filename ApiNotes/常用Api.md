@@ -510,3 +510,9 @@ RaycastHit                        //结构体,存放物理射线碰撞信息.
 [float]Input.GetAxis（“轴向名称”）; //取得轴向的值
 ```
 
+## 24.Animator动画控制面板
+
+```csharp
+Animator.SetFloat（name, value）; //通过 Animator 给过渡条件赋值
+```
+
