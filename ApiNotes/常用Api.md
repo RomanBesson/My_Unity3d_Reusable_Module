@@ -337,6 +337,14 @@ new WaitForSeconds(float)   //延迟等待x秒.
 [T[]] GetComponentsInChildren<T>()  //在子物体中查找指定组件.
 ```
 
+### 
+
+### 5.6.更改角色面部朝向
+
+```csharp
+[void] LookAt(Vector3); //看向输入位置
+```
+
 
 
 ## 6.Rigidbody[刚体组件]
@@ -438,9 +446,19 @@ new WaitForSeconds(float)   //延迟等待x秒.
 
 ## 16.AudioSource
 
+### 1.播放和停止
+
 ```c#
 [void] Play()                      //播放音频.
 [void] Stop()                      //停止播放.
+
+```
+
+
+
+### 2.在某个地方播放
+
+```csharp
 [s][void] PlayClipAtPoint(AudioClip, Vector3) //在指定位置播放音效.
 ```
 
@@ -512,7 +530,23 @@ RaycastHit                        //结构体,存放物理射线碰撞信息.
 
 ## 24.Animator动画控制面板
 
+### 1.过度条件
+
 ```csharp
 Animator.SetFloat（name, value）; //通过 Animator 给过渡条件赋值
+```
+
+
+
+### 2.Ik
+
+```csharp
+[void] OnAnimatorIK（int index）//类似于我们之前的 start（） OnTriggerEnter（），都是 Unity 内置的事件函数，由引擎自己维护和调用，这个函数主要用于处理 IK 相关的逻辑
+//设置权重
+Animator.SetIKPostionWeight（AvatarIKGoal，int）；
+Animator.SetIKRotationWeight（AvatarIKGoal，int）；
+//绑定要Ik的物体的位置
+Animator.SetIKPosition（AvatarIKGoal，Vector3）；
+Animator.SetIKRotation（AvatarIKGoal，Quaternion）；
 ```
 
