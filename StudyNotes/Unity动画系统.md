@@ -114,6 +114,20 @@ public class CameraFollow : MonoBehaviour {
 
 创建动画遮罩，把需要遮住的动画控制套上遮罩。
 
+### 10.动作切换不连贯，跳帧的处理方法
+
+依次选中三个动画文件，将 **Animation** 选项卡中的三个 **Based Upon** [基于]下拉菜单都切换成 **Original**
+
+![1714215786000](../Img/1714215786000.png)
+
+![1714215876855](../Img/1714215876855.png)
+
+- **Root Transform Rotation**，基于 **Body Orientation / Original；**
+
+  -  Body Orientation [身体定位]：保持上半身朝前；
+
+  - Original [原件]：保持原文件中的原始旋转信息。
+
 ## 1.Mecanim 动画系统
 
 ### 1.1.创建人形 Avatar
@@ -162,6 +176,231 @@ public class KnightPlayer : MonoBehaviour {
         m_Animator.SetIKPosition(AvatarIKGoal.LeftHand, IKTarget.position);
         m_Animator.SetIKRotation(AvatarIKGoal.LeftHand, IKTarget.rotation);
     }
+
+}
+
+```
+
+## 3.Blend Tree 混合树
+
+混合树是什么呢？我的理解是一种两个动画之间过渡更完美，且使用尽量少的变量操作过渡过程的一种技术。
+
+### 3.1.一维混合树
+
+#### 1.创建混合树节点
+
+1. 动画节点区域，点击鼠标右键：Create State --> From New Blend Tree；
+2. 生成 Blend Tree 动画节点的同时，还会自动创建一个 float 类型的参数；
+
+（参数列表中存在 float 类型的参数，则不会再自动创建 float 类型的参数。）
+
+![1714215475553](../Img/1714215475553.png)
+
+​                                                                                                            **混合树如图**
+
+#### 示例：一维混合树切换走路和跑步
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class SwatBlendTree : MonoBehaviour
+{
+    private Animator m_Animator;
+    private float velocity = 0.0f;
+    private int velocityHash;
+
+
+    void Start()
+    {
+        m_Animator = gameObject.GetComponent<Animator>();
+        velocityHash = Animator.StringToHash("Velocity");
+        Debug.Log("velocityHash:" + velocityHash);
+    }
+
+
+    void Update()
+    {
+        bool forward = Input.GetKey(KeyCode.W);
+
+        //速度0->1.
+        if (forward && velocity < 1.0f)
+        {
+            velocity += Time.deltaTime;
+        }
+
+        //速度1->0.
+        if (!forward && velocity > 0.0f) 
+        {
+            velocity -= Time.deltaTime;
+        }
+
+        //重置最小值为0.
+        if (!forward && velocity < 0.0f)
+        {
+            velocity = 0;
+            Debug.Log("velocity = 0");
+        }
+
+        //重置最大值为1.
+        if(velocity > 1.0f)
+        {
+            velocity = 1.0f;
+            Debug.Log("velocity = 1.0f");
+        }
+
+
+        m_Animator.SetFloat(velocityHash, velocity);
+    }
+}
+
+```
+
+
+
+#### 2.二维混合树
+
+##### 参数与节点
+
+1. 创建两个 float 类型的参数：Forward 和 Right；
+2. 创建 Blend Tree 节点，直接与 Entry 节点相连。
+3. 使用 **2D Freeform Directional** 模式。
+
+![1714264980344](../Img/1714264980344.png)
+
+> **2D 简单定向的局限性**：
+>
+> 二维混合树主要使用的就是“2D 自由形式定向”模式，“2D 简单定向”模式，可以看作是“2D 自由形式定向”模式的简化版；
+>
+> **“2D 简单定向”模式有两个局限性：**
+>
+> -  单个方向只能与一个动画产生混合；
+>
+> -  运动方向的间隔必须小于 180 度。
+
+##### 示例：使用 wad 加 shift 实现跑加速跑切换
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class SwatTwoBlendTree : MonoBehaviour
+{
+    private Animator m_Animator;
+
+    //四个按键的状态.
+    private bool forward;
+    private bool right;
+    private bool left;
+    private bool run;
+
+    //两个哈希值.
+    private int forwardHash;
+    private int rightHash;
+
+    //两个参数的值.
+    private float forwardValue;
+    private float rightValue;
+
+    //最大阈值, 最小阈值, 当前阈值.
+    private float max = 2.0f;
+    private float min = 1.0f;
+    private float current;
+
+
+    void Start()
+    {
+        m_Animator = gameObject.GetComponent<Animator>();
+
+        //哈希值转换.
+        forwardHash = Animator.StringToHash("Forward");
+        rightHash = Animator.StringToHash("Right");
+    }
+
+    void Update()
+    {
+        //持续获取四个按键的状态.
+        forward = Input.GetKey(KeyCode.W);
+        right = Input.GetKey(KeyCode.D);
+        left = Input.GetKey(KeyCode.A);
+        run = Input.GetKey(KeyCode.LeftShift);
+
+        CodeC();
+
+        //Animator参数赋值.
+        m_Animator.SetFloat(forwardHash, forwardValue);
+        m_Animator.SetFloat(rightHash, rightValue);
+    }
+
+
+
+    /// <summary>
+    /// 二段动画混合 + Shift抬起.
+    /// </summary>
+    private void CodeC()
+    {
+        //-----------Shift按键状态.-------------
+        if (run)
+        {
+            current = max;  //2.0f;
+        }
+        else
+        {
+            current = min;  //1.0f;
+        }
+
+
+        //-------------数值递增.----------------
+        if (forward && forwardValue < current)
+        {
+            forwardValue += Time.deltaTime;
+        }
+
+        if (right && rightValue < current)
+        {
+            rightValue += Time.deltaTime;
+        }
+
+        if (left && rightValue > -current)
+        {
+            rightValue -= Time.deltaTime;
+        }
+
+        //-------------数值递减.----------------
+        if (!forward && forwardValue > 0.0f)
+        {
+            forwardValue -= Time.deltaTime;
+        }
+
+        if (!right && rightValue > 0.0f)
+        {
+            rightValue -= Time.deltaTime;
+        }
+
+        if (!left && rightValue < 0.0f)
+        {
+            rightValue += Time.deltaTime;
+        }
+
+        //----------Shift键抬起.------------
+        if (current == min && forwardValue > min)
+        {
+            forwardValue -= Time.deltaTime;
+        }
+
+        if (current == min && rightValue > min)
+        {
+            rightValue -= Time.deltaTime;
+        }
+
+        if (current == min && rightValue < -min)
+        {
+            rightValue += Time.deltaTime;
+        }
+    }
+
 
 }
 

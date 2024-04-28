@@ -530,10 +530,11 @@ RaycastHit                        //结构体,存放物理射线碰撞信息.
 
 ## 24.Animator动画控制面板
 
-### 1.过度条件
+### 1.过度条件的获取和赋值
 
 ```csharp
-Animator.SetFloat（name, value）; //通过 Animator 给过渡条件赋值
+Animator.Set。。。（name, value）; //通过 Animator 给过渡条件赋值
+Animator.Get。。。（name, value）; //获取某过渡条件的值
 ```
 
 
@@ -548,5 +549,28 @@ Animator.SetIKRotationWeight（AvatarIKGoal，int）；
 //绑定要Ik的物体的位置
 Animator.SetIKPosition（AvatarIKGoal，Vector3）；
 Animator.SetIKRotation（AvatarIKGoal，Quaternion）；
+```
+
+
+
+### 3.转换成哈希码
+
+```csharp
+[int]Animator.StringToHash(string);  //Unity引擎中Animator组件的一个方法，它用于将一个字符串转换为一个整数哈希值。这个哈希值是基于字符串内容的，用于在动画系统中唯一标识一个动画状态或参数。
+```
+
+在Unity中，当你使用Animator组件来控制角色动画时，你通常会引用动画状态机中的状态或参数。这些状态和参数在Animator组件中是以字符串形式定义的。为了提高性能和效率，Unity内部会将这些字符串转换为整数哈希值，因为整数比较比字符串比较要快得多。
+
+当你使用 `Animator.StringToHash(string)` 方法时，你需要传入一个字符串参数，该方法会返回一个整数哈希值。这个哈希值可以用于以下场景：
+
+```csharp
+Animator animator;
+string stateName = "Walk"; // 假设这是动画状态机中的一个状态名称
+
+// 获取状态的哈希值
+int stateHash = Animator.StringToHash(stateName);
+
+// 触发状态
+animator.SetTrigger(stateHash);
 ```
 
