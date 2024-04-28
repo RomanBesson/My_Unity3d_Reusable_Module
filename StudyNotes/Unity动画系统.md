@@ -406,3 +406,99 @@ public class SwatTwoBlendTree : MonoBehaviour
 
 ```
 
+## 4.ScriptableObject 的使用
+
+### 4.1.概念介绍
+
+1. ScriptableObject [数据脚本化对象]：本身是一个 C#父类，在 Unity 引擎中类似于 MonoBehaviour 父类，在 Unity 项目工程中所创建的脚本文件，可以直接继承 ScriptableObject 父类；
+2. 继承 MonoBehaviour 父类的脚本文件，主要用于实现游戏中的各项功能，可以直接拖拽挂载到游戏物体身上，项目运行后，引擎会自动实例化该脚本的对象；
+3. 继承 ScriptableObject 父类的脚本文件，主要用于存储各种类型的数据，借助编辑器扩展功能，在项目未运行状态，创建该脚本文件的“数据对象文件”，然后对“数据对象文件”进行数据配置，以供其他脚本使用。
+
+### 4.2.基础使用
+
+1. 创建一个示例类 Person 类
+
+   - 创建专用测试场景，以及脚本子文件夹；
+   - 创建 Person.cs 类，在类中定义基础字段和方法；
+   - Person 类继承 ScriptableObject 父类。
+
+2. 创建资源菜单
+
+   - ScriptableObject 子类脚本创建对象，需要借助于编辑器扩展功能；
+
+   - 在子类定义的上方，使用 C#特性，给引擎添加菜单操作项，固定格式如下：
+
+   ​              **[CreateAssetMenu(fileName = “name”, menuName = “Aaa/Bbb”)]**
+
+   > 参数说明：
+
+   - CreateAssetMenu：创建资源菜单项；[Assets 右键 -> Create -> 菜单项]
+   - fileName：创建出来的资源文件的默认名称；
+   - menuName：菜单名称，可以是顶级菜单项，也可以是嵌套菜单项；
+
+   > 注意：
+   >
+   > 1.菜单名称
+   >
+   > ①menuName 属性赋值，值的前边和后边都不要加“/”，否则菜单项无法显示；
+   >
+   > ②菜单选项的层级，理论上可以无限深，按需设置即可。
+   >
+   > 2.类中成员
+   >
+   > ①ScriptableObject 子类脚本的对象，是以“.asset”资源文件的形式存在于
+   >
+   > 项目工程中的，最大的价值就是存储数据，提供给其他脚本访问和使用；
+   >
+   > ②所以，ScriptableObject 子类脚本在编写时，以公开字段，公开方法为主。
+   >
+   > [字段私有，公开属性的方式，无意义，和普通脚本编写还是有区别的。]
+
+**常用特性：**
+
+- **[Range(float, float)]**
+
+给 int，float 类型的公开字段，设置取值范围；设置该特性之后，原本的“输入框”会变成“滑块+输入框”形式。
+
+- **[Header(string)]**
+
+在字段上方添加标题。
+
+- **[Tooltip(string)]**
+
+在字段上添加提示信息；设置该特性之后，鼠标进入字段范围，以提示框的形式展现信息
+
+**例子如下:**
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "New Cube", menuName = "MyObject/Cube")]
+public class Cube : ScriptableObject
+{
+    public string MyString;
+
+    [Header("编号")]
+    [Range(1, 10)]
+    public int MyInt;
+
+    [Range(0.0f, 1.0f)] public float MyFloat;
+
+    public bool MyBool;
+
+    [Tooltip("游戏物体的位置")]
+    public Vector3 MyVector3;
+
+    public Vector3[] Vector3Array;
+    public List<GameObject> GameObjectList;
+
+    public GameObject MyGameObject;
+    public Material MyMaterial;
+    public Texture2D MyTexture2D;
+
+}
+
+```
+
