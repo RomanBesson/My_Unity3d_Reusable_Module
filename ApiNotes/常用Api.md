@@ -69,7 +69,7 @@ git remote remove origin
 ### 4.3.拉取代码
 
 ```bash
-git pull origin master
+    git pull origin master
 ```
 
 
@@ -572,5 +572,32 @@ int stateHash = Animator.StringToHash(stateName);
 
 // 触发状态
 animator.SetTrigger(stateHash);
+```
+
+## 25.Unity的特性
+
+```csharp
+
+[HideInInspector] //这个特性用于隐藏字段或属性，使其在Unity编辑器的Inspector面板中不可见。这对于不想让某些字段被编辑器直接访问的私有变量非常有用。
+
+[SerializeField] //这个特性用于将私有字段序列化并显示在Inspector面板中，即使它是私有的。这允许开发者在不公开字段的情况下，仍然可以在编辑器中修改它的值。
+
+[Header] //这个特性用于在Inspector面板中为字段添加一个标题，以提高代码的可读性。
+
+[Range(min, max)] //这个特性用于限制一个浮点数或整数字段的值在指定的最小值和最大值之间。
+
+[Tooltip] //这个特性用于为字段添加一个工具提示，当鼠标悬停在Inspector面板中的字段上时显示。
+
+[Space] //这个特性用于在Inspector面板中添加垂直空间，以分隔不同的字段。
+
+[ContextMenu] //这个特性用于为字段或方法添加一个上下文菜单项，可以在编辑器中通过右键点击来调用。
+
+[ExecuteInEditMode] //这个特性用于在编辑模式下执行脚本，允许在编辑器中测试脚本的行为。
+
+[RequireComponent] //这个特性用于确保GameObject在添加脚本时，也自动添加所需的组件。
+
+[AddComponentMenu] //这个特性用于将自定义组件添加到Unity编辑器的组件菜单中。
+
+[CreateAssetMenu] //这个特性用于创建自定义的Asset菜单项，允许用户通过Unity编辑器创建自定义的资源。
 ```
 
