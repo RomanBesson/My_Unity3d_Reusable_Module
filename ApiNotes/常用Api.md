@@ -69,7 +69,7 @@ git remote remove origin
 ### 4.3.拉取代码
 
 ```bash
-    git pull origin master
+git pull origin master
 ```
 
 
@@ -599,5 +599,21 @@ animator.SetTrigger(stateHash);
 [AddComponentMenu] //这个特性用于将自定义组件添加到Unity编辑器的组件菜单中。
 
 [CreateAssetMenu] //这个特性用于创建自定义的Asset菜单项，允许用户通过Unity编辑器创建自定义的资源。
+```
+
+
+
+## 26.导航_NavMeshAgent
+
+### 1.设置目的地
+
+```csharp
+[void] SetDestination(Vector)
+```
+
+### 2.目的地属性
+
+```csharp
+[Vector3] destination //读写属性，物体最终导航到的目的地
 ```
 
