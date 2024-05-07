@@ -617,3 +617,9 @@ animator.SetTrigger(stateHash);
 [Vector3] destination //读写属性，物体最终导航到的目的地
 ```
 
+### 3.距离目标点剩余距离
+
+```csharp
+[float]remainingDistance
+```
+

@@ -1,3 +1,5 @@
+[toc]
+
 # 导航系统介绍篇
 
 ## 一些注意事项和问题
@@ -7,6 +9,12 @@
 ![1714958002881](../Img/1714958002881.png)
 
 起点和终点距离烘焙区域太远了，拉回来。
+
+### 2.给地面换了贴图，角色没了阴影怎么办？
+
+![1715050471742](../Img/1715050471742.png)
+
+修改地面的`Shader`, 将 Shader 修改成 Legacy Shader 下的 Diffuse。
 
 ## 1.导航系统的搭建和使用
 
@@ -363,6 +371,172 @@ public class PlayerMoveByMouse : MonoBehaviour
             }
         }
       
+    }
+}
+
+```
+
+## 2.使用LineRenderer制作线流动效果
+
+①首先创建一个空物体，挂载 LineRenderer 这个组件；
+
+②通过 Positions 将 LineRenderer 变长；
+
+③创建一个新材质球，设置 Shader 为 **Particles/Additive(Soft)**，指定贴图；
+
+④给 LineRenderer 组件指定刚才创建的材质球；
+
+⑤通过 Texture Mode 设置为 Tile 可以让贴图平铺，避免贴图拉伸变形；
+
+![1715060674352](../Img/1715060674352.png)
+
+如图所示
+
+**下面，我们开始实现流动效果：**
+
+①定义一个变量，用于表示 UV 移动的速度；
+
+②查找到 LineRenderer 组件上的 Material；
+
+③使用 Time.time 与速度值相乘，得到一个不断增加的值；
+
+④使用 Material.SetTextureOffset(“贴图名”，Vector2)方法控制动画。
+
+**备注：Shader 上的主贴图的贴图名叫：_MainTex。**脚本如下：
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+/// <summary>
+/// 线流动动画
+/// </summary>
+public class LineEffect : MonoBehaviour
+{
+    private float speed = 0.5f;
+    private Material material;
+
+    void Start()
+    {
+        material = gameObject.GetComponent<LineRenderer>().material; 
+    }
+
+    void Update()
+    {
+        float x = Time.time * speed;
+        material.SetTextureOffset("_MainTex", new Vector2(x, 0));
+    }
+}
+
+```
+
+## 3.新手引导线的制作
+
+①创建一个空物体，挂载一个新创建的脚本，用于管理“移动引导”；
+
+②该脚本内创建两个 public 变量，持有目标点特效，引导线特效两个预制体；
+
+③在空物体下再创建三个空物体，作为目标点特效的生成位置，并持有这三个点；
+
+④实例化一个目标点特效，再实例化一个引导线，设置引导线的两个点的位置；
+
+⑤角色添加刚体，目标点添加触发器，用于判断用户进入，如果用户进入范围，就删除现在的特效，并生成新的引导特效。
+
+![1715071845397](../Img/1715071845397.png)
+
+**脚本如下：**
+
+父物体
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class MoveGuide : MonoBehaviour
+{
+    public GameObject Player; //玩家
+    public GameObject prefab_LineEffect;    //引导线特效.
+    public GameObject prefab_TargetEffect;  //目标点特效.
+
+    private Transform point0;
+    private Transform point1;
+
+    //生成的线和导航点特效
+    private GameObject targetEffect;
+    private GameObject lineEffect;
+
+    void Start()
+    {
+        point0 = transform.Find("point0").GetComponent<Transform>();
+        point1 = transform.Find("point1").GetComponent<Transform>();
+        CreateEffect(Player.transform.position, point0.position);
+    }
+
+   
+    void Update()
+    {
+
+    }
+
+    /// <summary>
+    /// 生成导航线
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    private void CreateEffect(Vector3 start, Vector3 end)
+    {
+        //生成对应物体
+        targetEffect = Instantiate(prefab_TargetEffect, end, Quaternion.identity);
+        lineEffect = Instantiate(prefab_LineEffect, end, Quaternion.identity);
+        lineEffect.GetComponent<LineRenderer>().SetPosition(0, start);
+        lineEffect.GetComponent<LineRenderer>().SetPosition(1, end);
+    }
+
+    /// <summary>
+    /// 接收子物体传来的信息，进行线的销毁和新线的创建
+    /// </summary>
+    /// <param name="id"></param>
+    private void TriggerEnter(object id)
+    {
+        int index = (int)id;
+        if (index == 0)
+        {
+            GameObject.Destroy(targetEffect);
+            GameObject.Destroy(lineEffect);
+            //在玩家和和点位置划线
+            CreateEffect(Player.transform.position, point1.position);
+        }
+        else if (index == 1)
+        {
+            GameObject.Destroy(targetEffect);
+            GameObject.Destroy(lineEffect);
+        }
+    }
+}
+
+```
+
+子物体(挂载到point上)
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Point : MonoBehaviour
+{
+
+    public int index;
+
+    void OnTriggerEnter(Collider coll)
+    {
+        object id = index;
+        if (coll.name == "Player")
+        {
+            SendMessageUpwards("TriggerEnter", id);
+        }
     }
 }
 
