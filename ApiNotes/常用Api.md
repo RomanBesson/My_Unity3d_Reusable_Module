@@ -334,10 +334,10 @@ new WaitForSeconds(float)   //延迟等待x秒.
 
 ```c#
 [Transform] Find(string)             //在子物体中查找指定物体.
-[T[]] GetComponentsInChildren<T>()  //在子物体中查找指定组件.
+[T[]] GetComponentsInChildren<T>()  //在子物体中查找指定组件
 ```
 
-### 
+> **注意**：GetComponentsInChildren 会将父物体的 Transform 也一同获取。
 
 ### 5.6.更改角色面部朝向
 
@@ -621,5 +621,11 @@ animator.SetTrigger(stateHash);
 
 ```csharp
 [float]remainingDistance
+```
+
+### 4.到距离目标点多远的距离停止
+
+```csharp
+[float]stoppingDistance
 ```
 

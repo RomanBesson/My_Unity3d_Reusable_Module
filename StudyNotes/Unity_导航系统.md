@@ -175,7 +175,7 @@
 
 ![1714963448917](../Img/1714963448917.png)
 
-### **Nav Mesh Obstacle：导航网格障碍物的介绍：**
+### Nav Mesh Obstacle：导航网格障碍物的介绍：
 
 在角色的导航范围内，如果说需要出现障碍物，我们一般是将这些障碍物设置为静态，一起参与 Navigation 的导航烘焙；这样的话，我们的角色在导航的时候，就不会与这些障碍物模型相碰撞。
 
@@ -542,3 +542,233 @@ public class Point : MonoBehaviour
 
 ```
 
+## 4.摄像机跟随和自动升降副本门的实现
+
+### 1.摄像机跟随
+
+挂摄像机上，没啥好说的，调下偏移：
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class CameraFollow : MonoBehaviour
+{
+    private Transform player_transform;
+    private Vector3 offset;
+
+    void Start()
+    {
+        player_transform = GameObject.Find("Player").GetComponent<Transform>();
+        offset = new Vector3(3.46f, 9.35f, -4.03f);
+    }
+
+    void Update()
+    {
+        transform.position = Vector3.Lerp(transform.position, player_transform.position + offset, Time.deltaTime * 2);
+    }
+}
+
+```
+
+
+
+### 2.自动升降
+
+![1715131165203](../Img/1715131165203.png)
+
+挂上对应组件：
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class HouseManager : MonoBehaviour
+{
+    private Transform wall_1;
+    private Transform wall_2;
+
+    void Start()
+    {
+        wall_1 = GameObject.Find("Environment/Doors/door_1").GetComponent<Transform>();
+        wall_2 = GameObject.Find("Environment/Doors/door_2").GetComponent<Transform>();
+    }
+
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            StartCoroutine(WallOpen(wall_1));
+        }
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            StartCoroutine(WallOpen(wall_2));
+        }
+
+    }
+
+
+    IEnumerator WallOpen(Transform wall)
+    {
+        while (wall.position.y > -2.7f)
+        {
+            wall.position = new Vector3(wall.position.x, wall.position.y - 0.1f, wall.position.z);
+            yield return new WaitForSeconds(0.05f);
+        }
+    }
+}
+
+```
+
+
+
+## 5.小怪生成和追踪
+
+![1715143292062](../Img/1715143292062.png)
+
+**层级结构如上图：**
+
+- MonsteCreaterPoints：里面装的是小怪生成的点位。
+- MonsterManager：控制怪物生成。
+- Moster预制体：怪物预制体。
+
+**代码如下：**
+
+挂MonsterManager上：
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class MonsterManager : MonoBehaviour
+{
+    private Transform[] points;         //小怪生成点.
+
+    private GameObject prefab_AAA;
+    private GameObject prefab_BBB;
+
+    private List<GameObject> monsterList;   //小怪管理集合.
+
+    private string playerName;
+    void Start()
+    {
+        playerName = "Player";
+        points = GameObject.Find("MonsteCreaterPoints").GetComponent<Transform>().GetComponentsInChildren<Transform>();
+
+        prefab_AAA = Resources.Load<GameObject>("Moster(Close)");
+        prefab_BBB = Resources.Load<GameObject>("Moster(Long)");
+        
+        monsterList = new List<GameObject>();
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            CreateAllMonster();
+        }
+    }
+
+    /// <summary>
+    /// 生成所有小怪.
+    /// </summary>
+    private void CreateAllMonster()
+    {
+        for (int i = 1; i < points.Length; i++)
+        {
+            if (i <= 2)
+            {
+                CreateMonster(prefab_AAA, points[i].position, 2);
+            }
+            else
+            {
+                CreateMonster(prefab_BBB, points[i].position, 5);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 生成单个小怪.
+    /// </summary>
+    private void CreateMonster(GameObject prefab, Vector3 pos, float dis)
+    {
+        GameObject temp = GameObject.Instantiate(prefab, pos, Quaternion.identity);
+        //动态的给小怪添加脚本.
+        Monster monster = temp.AddComponent<Monster>();
+        //调用追踪函数
+        monster.SetTarget(playerName, dis);
+        //在场景资源层面上管理好生成的小怪.
+        temp.GetComponent<Transform>().SetParent(transform);
+        Debug.Log(temp.name);
+        //把实例化出来的小怪添加到集合中进行管理.
+        monsterList.Add(temp);
+    }
+
+
+}
+
+```
+
+谁都别挂，自动挂载：
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+
+public class Monster : MonoBehaviour
+{
+    private NavMeshAgent m_NavMeshAgent;
+
+    private Transform player_Transform;     //持有主角模型的Transform.
+
+    private float distance;                 //距离.
+
+    private bool alive = true;              //小怪的一个存活状态.
+    void Awake()
+    {
+        m_NavMeshAgent = gameObject.GetComponent<NavMeshAgent>();
+    }
+
+    /// <summary>
+    /// 设置起始目的地以及小怪追踪
+    /// </summary>
+    /// <param name="playerName"></param>
+    /// <param name="dis"></param>
+    public void SetTarget(string playerName, float dis)
+    {
+        player_Transform = GameObject.Find(playerName).GetComponent<Transform>();
+        m_NavMeshAgent.SetDestination(player_Transform.position);
+
+        //设置小怪的停止距离.
+        distance = dis;
+        m_NavMeshAgent.stoppingDistance = distance;
+
+        StartCoroutine("FollowNavigation");
+    }
+
+    /// <summary>
+    /// 跟随导航.
+    /// </summary>
+    IEnumerator FollowNavigation()
+    {
+        while (alive)
+        {
+            if (Vector3.Distance(transform.position, player_Transform.position) > distance)
+            {
+                m_NavMeshAgent.SetDestination(player_Transform.position);
+            }
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+
+}
+
+```
+
+> **注意：**这种内部生成小怪的脚本的初始化，尽量放在`Awake()`，避免和生成或者挂载他的脚本起冲突。
