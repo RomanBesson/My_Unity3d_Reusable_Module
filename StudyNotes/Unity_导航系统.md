@@ -319,7 +319,120 @@ public class ParticleDemo : MonoBehaviour {
 
 ```
 
+## 8.NavMeshSurface 组件
 
+这是新版用于渲染的组件，他将旧版那个给组件化了。
+
+### 常用参数：
+
+NavMeshSurface [导航网格表面]：等同于 Navigation(Obsolete)面板中的Bake 选项卡，都是用于烘焙导航网格数据，组件常用属性如下：
+
+- **Clear 和 Bake**：清空数据和生成数据
+
+在场景文件的同名文件夹中，生成或删除导航网格数据文件。
+
+- **Default Area**：默认区域
+
+对应 Areas 选项卡，用于指定当前导航区域默认的区域类型和行走代价；
+
+两个 Areas 选项卡数据是同步的，更改其中一个并保存，另外一个会自动同步数据。
+
+- **Use Geometry**：使用几何 [使用“谁”的尺寸作为导航网格的烘焙依据]
+  - Render Meshes：渲染网格，以模型网格尺寸进行烘焙；
+  - Physics Colliders：物理碰撞，以碰撞器尺寸进行烘焙。
+
+- **Object Collection**：对象集合 [哪些游戏物体参与导航地形数据的烘焙]
+  -  All Game Objects：所有符合规则的游戏物体，外部自动虚线框包裹；
+  - Volume：自定义体积，在体积范围内的所有符合规则的游戏物体；
+  - Current Object Hierarchy：当前对象层级结构，游戏物体的子物体。
+
+
+
+## 9.NavMeshLink 组件
+
+这个的功能类似于Off Mesh Link，是他的升级版。
+
+### 常用参数：
+
+- S**tart Point 和 End Point**：开始点和结束点
+
+先将空物体移动到合适的位置，然后调整跳跃线开始点和结束点的位置；
+
+可以通过场景视图内组件的“调节点”进行位置调整；也可以直接输入 X，Y，Z 坐标值，通常情况下是组合使用。
+
+- **Align Transform**：对齐变换
+
+让空物体的中心点与跳跃线的中心点对齐，便于鼠标点击选择。
+
+- **Swap 和 Bidirectional**：交互和双向
+
+跳跃线默认勾选 Bidirectional 复选框，双向箭头跳跃线；
+
+取消勾选变成单向箭头跳跃线，再点击 Swap 可以控制箭头的朝向；
+
+再点击 Align Transform，保持空物体正方向和跳跃线箭头方向一致。
+
+
+
+## 10.NavMeshModifierVolume
+
+### 1.基础介绍
+
+①NavMeshModifierVolume [导航网格修改器体积]：类似于 Object 选项卡；
+
+②旧版导航使用过程中，如果想将某个区域设置成特殊“类型”，需要先选中模型，
+
+然后 Object 选项卡中修改 Navigation Area 数据；[三座桥梁]
+
+③场景中创建空物体，挂载 NavMeshModifierVolume 组件；
+
+④修改场景内某个区域的类型，该组件基于一个可调整的范围，Object 选项卡基于
+
+单个模型，新版组件的形式更灵活。
+
+### 2.组件使用演示
+
+①通过调整 Size 和 Center 属性，将需要设置的区域包裹起来；
+
+②使用 Area Type 属性选择该区域的“类型”；
+
+③使用 Affected Agents [受影响的代理]属性，选择影响哪些角色代理；
+
+④重新烘焙生成导航网格数据。
+
+
+
+## 11.NavMeshModifier
+
+### 1.基础介绍
+
+NavMeshModifier [导航网格修改器]：相较于 NavMeshModifierVolume 组
+
+件，取消了可视化的“体积”，该组件是 Object 选项卡的加强版。
+
+### 2.组件参数演示
+
+空中平台模型添加 NavMeshModifier，组件常用属性如下：
+
+①Mode [模式]：选择不同的模式，会关联不同的控制参数；
+
+|-- Add or Modify object [添加或者修改对象]
+
+|-- Remove object [移除对象]
+
+②模式选择“Add”，可以控制该模型在导航网格数据生成时的细节；
+
+③模式选择“Remove”，在生成导航网格数据时，可以“忽略”该模型；
+
+④Affected Agents [受影响的代理]：选择影响哪些角色的导航网格数据；
+
+⑤Apply To Children [应用到子物体]：勾选该属性，子物体受到同样的参数影响；
+
+⑥Override Area [覆盖区域]：勾选该属性，可以修改该模型的“区域类型”；
+
+⑦Override Generate Links [覆盖生成跳跃线]：勾选该属性，可以控制该模型
+
+是否自动生成导航网格跳跃线。
 
 # 导航案例篇
 
