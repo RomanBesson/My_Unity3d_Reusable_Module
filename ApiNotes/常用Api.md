@@ -629,3 +629,20 @@ animator.SetTrigger(stateHash);
 [float]stoppingDistance
 ```
 
+## UGUI
+
+### 1.通过拖拽事件改变图片位置
+
+```csharp
+[Vector3]RectTransformUtility.ScreenPointToWorldPointInRectangle(m_RectTransform,eventData.position,eventData.enterEventCamera,out pos); //屏幕坐标点转化为世界坐标点；
+```
+
+>**其中：**
+>
+>`m_RectTransform`   //游戏物体的 RectTransform ;
+>
+>`eventData.position`  //当前坐标位置点；
+>
+>`eventData.enterEventCamera`  //事件摄像机；
+>
+>`out pos`  //最终计算得到的世界坐标位置；
