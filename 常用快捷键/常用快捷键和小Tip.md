@@ -16,4 +16,9 @@
 # Visual Studio
 
 - **ctrl + H : ** 替换和批量替换
+
 - **修改编辑模式（编辑代码的闪烁光标变成闪烁框）：**键盘上  `Insert`键，修改插入模式。
+
+  # typora/markdown
+
+- **ctrl + 鼠标左键**：批量选中
