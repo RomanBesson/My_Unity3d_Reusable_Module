@@ -1,5 +1,51 @@
 [toc]
 
+# Windows PowerShell
+
+## 1.PowerShell的执行策略
+
+在Windows操作系统中，PowerShell的执行策略决定了哪些类型的脚本可以被执行。执行策略可以是以下几种之一：
+
+- **Restricted**：不允许任何脚本执行。
+- **AllSigned**：只允许执行已签名的脚本。
+- **RemoteSigned**：本地脚本可以执行，但来自互联网的脚本必须已签名。
+- **Unrestricted**：允许执行所有脚本。
+
+如果你想要关闭远程脚本执行权限，可以将执行策略设置为 **Restricted**。以下是关闭远程脚本执行权限的步骤：
+
+**打开Windows PowerShell作为管理员**：
+
+- 在开始菜单中搜索“PowerShell”。
+- 右键点击“Windows PowerShell”，选择“以管理员身份运行”。
+
+**查看当前的执行策略**：
+
+- 在PowerShell窗口中输入以下命令并回车：
+
+  ```powershell
+  Get-ExecutionPolicy
+  ```
+
+- 这将显示当前的执行策略。
+
+**更改执行策略**：
+
+- 如果当前执行策略为“RemoteSigned”或“Unrestricted”，你可以通过以下命令将执行策略设置为“Restricted”：
+
+  ```powershell
+  Set-ExecutionPolicy Restricted
+  ```
+
+- 系统将提示你确认是否要更改执行策略。输入“Y”然后按 Enter 确认。
+
+**确认更改**：
+
+- 如果你确定要更改执行策略，输入“Y”然后按 Enter 确认。
+
+更改执行策略后，只有本地脚本文件可以执行，而来自互联网的脚本将被阻止执行。这有助于提高系统的安全性，防止潜在的恶意脚本执行。
+
+请注意，更改执行策略可能会影响某些脚本的执行，特别是那些需要远程执行的脚本。在更改执行策略之前，请确保你了解可能的影响，并且只在必要时更改执行策略。如果你需要执行远程脚本，可以考虑将执行策略更改为“RemoteSigned”或“AllSigned”，并确保你信任的脚本都已签名。
+
 # Git_Api
 
 ## 1.初始化仓库
@@ -646,3 +692,29 @@ animator.SetTrigger(stateHash);
 >`eventData.enterEventCamera`  //事件摄像机；
 >
 >`out pos`  //最终计算得到的世界坐标位置；
+
+### 2.Image
+
+#### 填充属性
+
+```csharp
+[float]fillAmount
+```
+
+### 3.RectTransform
+
+#### 将小怪的位置（3D 位置）转换为屏幕位置（2D 位置）；
+
+```csharp
+[Vecteo2]RectTransformUtility.WorldToScreenPoint(Camera.main, cubePos);//WorldToScreenPoint:世界位置转换为屏幕位置. 
+```
+
+### 4.Button
+
+#### 不同状态的按钮图片
+
+```csharp
+[SpriteState]GetComponent<Button>().spriteState.xxxxx
+//Button 组件的 spriteState 属性中，可以找到按钮的不同状态图片
+```
+
