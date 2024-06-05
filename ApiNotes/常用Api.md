@@ -78,7 +78,7 @@ cd ~/.ssh
 ### 3.2.生成ssh
 
 ```bash
-ssh-keygen -t rsa -C “你的邮箱”
+ssh-keygen -t rsa -C "你的邮箱"
 ```
 
 
@@ -98,7 +98,7 @@ ssh -T git@github.com
 ### 4.1.连接远程仓库
 
 ```bash
-git remote add origin “你的仓库SSH地址”
+git remote add origin "你的仓库SSH地址"
 ```
 
 
@@ -130,7 +130,7 @@ git status
 git add .
 
 # 提交到本地仓库 
-git commit -m “你的备注信息”
+git commit -m "你的备注信息"
 
 # 提交到远程仓库
 git push -u origin master
@@ -150,7 +150,7 @@ git checkout <branch-name>
 
 ### 5.2.合并分支到主分支（前提条件：你现在是主分支）
 
-```
+```bash
 git merge "你要合并的分支名"
 ```
 
@@ -709,6 +709,18 @@ animator.SetTrigger(stateHash);
 [Vecteo2]RectTransformUtility.WorldToScreenPoint(Camera.main, cubePos);//WorldToScreenPoint:世界位置转换为屏幕位置. 
 ```
 
+#### UGUI 更改图片的宽和高
+
+API：
+
+```csharp
+[void]RectTransform.SetSizeWithCurrentAnchors(轴向,值);
+```
+
+> 参数：RectTransform.Axis.Horizontal/Vertical ：对应宽和高.
+
+
+
 ### 4.Button
 
 #### 不同状态的按钮图片
@@ -718,3 +730,41 @@ animator.SetTrigger(stateHash);
 //Button 组件的 spriteState 属性中，可以找到按钮的不同状态图片
 ```
 
+### 5.eventData
+
+#### 注意:必须导入命名空间`using UnityEngine.EventSystems;`改属性是对应接口的参数（IBeginDragHandler, IDragHandler, IEndDragHandler）
+
+#### 得到鼠标指针最终停留所在的游戏物体
+
+```csharp
+[GameObject]eventData.pointerEnter
+//该属性会返回一个 GameObject，这个对象就是目标游戏物体。但最终“碰撞”到的就是我们拖拽中的物品
+```
+
+### 6.CanvasGroup 组件
+
+#### 以控制当前的 UI 游戏物体是否接收射线的碰撞
+
+```csharp
+[bool]m_CanvasGroup.blocksRaycasts
+```
+
+
+
+## Socket
+
+### 服务器端客户端通用方法
+
+#### 创建socket对象
+
+```csharp
+Socket socket = new Socket(地址类型，Socket 类型，协议类型);
+```
+
+参数介绍：
+
+地址类型：使用 IPv4 地址协议，AddressFamily.InterNetwork
+
+Socket 类型：使用流式类型，SocketType.Stream
+
+协议类型：使用 TCP 协议类型，ProtocolType.Tcp
