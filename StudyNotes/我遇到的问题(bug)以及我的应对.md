@@ -43,6 +43,49 @@ item_Image.sprite = Resources.Load<Sprite>("Demo/SignPanel/TexTures/item/" + ite
 m_CanvasGroup.blocksRaycasts = false 
 ```
 
+## 5.如何让物体上的贴图和某些特效贴图融合（背景贴图和弹痕贴图融合）
+
+1. 需要对导入到项目中的模型贴图，弹痕贴图进行属性设置。
+   - ①勾选 Read/Write Enabled 属性；
+   - ②Format 属性设置成 RGBA 32 bit。
+2. 将模型身上的 BoxCollider 组件移除掉，添加 MeshCollider 组件用于碰撞检测。（因为物理射线hit只能获取MeshCollider 上的点。
+
+**核心方法：**
+
+```csharp
+/// <summary>
+    /// 弹痕融合.
+    /// </summary>
+    public void CreateBulletMark(RaycastHit hit)
+    {
+        //textureCoord:贴图UV坐标点.（获取击打位置在主贴图上的位置）
+        Vector2 uv = hit.textureCoord;
+
+        //宽度,横向,X轴.
+        for (int i = 0; i < m_BulletMark.width; i++)
+        {
+            //高度,纵向.Y轴.
+            for (int j = 0; j < m_BulletMark.height; j++)
+            {
+                //uv.x * 主贴图宽度- 弹痕贴图宽度/ 2 + i;
+                float x = uv.x * m_MainTexture.width - m_BulletMark.width / 2 + i;
+
+                //uv.y * 主贴图高度- 弹痕贴图高度/ 2 + j;               
+                float y = uv.y * m_MainTexture.height - m_BulletMark.height / 2 + j;
+
+                //获取到弹痕贴图上点的颜色.
+                Color color = m_BulletMark.GetPixel(i, j);
+
+                //主贴图位置融合弹痕贴图的颜色.(透明度高的像素点融合）
+                if (color.a > 0.2f) m_MainTexture.SetPixel((int)x, (int)y, color);
+            }
+        }
+        m_MainTexture.Apply();
+    }
+```
+
+然后融合方只需要和它射线检测时，把射线对象传过去就可以。（m_BulletMark：素材贴图       m_MainTexture：主贴图）
+
 # 网络相关
 
 ## 1.如何看自己电脑的ip地址
