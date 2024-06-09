@@ -401,17 +401,27 @@ new WaitForSeconds(float)   //延迟等待x秒.
 [void] AddRelativeForce(Vector3) //物体坐标系方向添加力[方向*力度].
 ```
 
+### 刚体睡眠
+
+```csharp
+[void]Rigidbody.Sleep()：//可以让刚体睡眠,也就是立刻停止运动。
+```
+
 
 
 ## 7.Vector3[三维向量]
 
-```c#
+```csharp
 [float]x, y, z                 //公开字段,可以单个读取,不可以单个修改.
 /*获取世界坐标系的六个方向*/
 [s][Vector3] forward, right, up   //只读属性,前,右,上.
 [s][Vector3] back, left, down     //只读属性,后,左,下.
 [s][Vector3] zero                  //只读属性,世界原点位置[0,0,0].
 [s][Vector3] Lerp(a, b, float t)  //在两个Vector3数据之间插值.
+[s][float]magnitude               //向量的模长
+[s][Vector]normalized             //标准化向量
+//effect.transform.rotation = Quaternion.LookRotation(hit.normal); 一般这么用
+[s][float]Distance(v1, v2)       //向量间的距离
 ```
 
 
@@ -647,6 +657,12 @@ animator.SetTrigger(stateHash);
 [CreateAssetMenu] //这个特性用于创建自定义的Asset菜单项，允许用户通过Unity编辑器创建自定义的资源。
 ```
 
+### 该脚本挂载的同时挂载另一个组件
+
+```csharp
+[RequireComponent(typeof(ObjectPool))] //挂载该脚本的同时挂载ObjectPool组件
+```
+
 
 
 ## 26.导航_NavMeshAgent
@@ -674,6 +690,16 @@ animator.SetTrigger(stateHash);
 ```csharp
 [float]stoppingDistance
 ```
+
+## 27.LayerMask
+
+### 获取某层的序号
+
+```csharp
+[string]LayerMask.NameToLayer("Env") 
+```
+
+
 
 ## UGUI
 
