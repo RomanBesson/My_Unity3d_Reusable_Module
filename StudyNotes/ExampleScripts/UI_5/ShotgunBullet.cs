@@ -28,7 +28,7 @@ public class ShotgunBullet : MonoBehaviour {
         //枪痕生成用的射线
         Ray ray = new Ray(transform.position, dir);
 
-        #region 设置射线只能检测11层（其他不重要）
+        #region（看这里的代码） 设置射线只能检测11层
         //返回射线事件 最后一个参数为只有该层触发射线检测
         if (Physics.Raycast(ray, out hit,1000, 1 << 11)) { }
         #endregion

@@ -569,6 +569,49 @@ RaycastHit                        //结构体,存放物理射线碰撞信息.
 [s][float] Lerp(float a, float b, float t)  //数学类插值运算.
 ```
 
+### 平滑阻尼
+
+```csharp
+[float]Mathf.SmoothDamp(current, target, ref currentVelocity, smoothTime);
+//Current：动画的运动范围；
+//Target：动画的最终位置，也就是 0；
+//currentVelocity：这个数据我们保持为 0 即可；
+//smoothTime:用当前动画时长，减去当前时长。
+```
+
+例子：
+
+```csharp
+ /// <summary>
+    /// 尾巴颤动动画.
+    /// </summary>
+    private IEnumerator TailAnimation()
+    {
+        //动画执行时长.
+        float stopTime = Time.time + 1.0f;
+
+        //动画的颤动范围.
+        float range = 1.0f;
+
+        float vel = 0;
+
+        //长矛动画开始的角度.
+        Quaternion startRot = Quaternion.Euler(new Vector3(Random.Range(-5.0f, 5.0f), Random.Range(-5.0f, 5.0f), 0));
+
+        while (Time.time < stopTime)
+        {
+            //动画的核心.
+            m_Pivot.localRotation = Quaternion.Euler(new Vector3(Random.Range(-range, range), Random.Range(-range, range), 0)) * startRot;
+
+            //平滑阻尼.
+            range = Mathf.SmoothDamp(range, 0, ref vel, stopTime - Time.time);
+
+            yield return null;
+        }
+```
+
+
+
 ## 22.Character Controller
 
 ### 移动
@@ -697,6 +740,20 @@ animator.SetTrigger(stateHash);
 
 ```csharp
 [string]LayerMask.NameToLayer("Env") 
+```
+
+## 28.Cursor（鼠标指针操作）
+
+### 鼠标锁定模式
+
+```csharp
+[CursorLockMode]lockState
+```
+
+### 鼠标是否显示
+
+```csharp
+[bool]visible
 ```
 
 
