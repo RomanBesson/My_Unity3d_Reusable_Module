@@ -383,12 +383,32 @@ new WaitForSeconds(float)   //延迟等待x秒.
 [T[]] GetComponentsInChildren<T>()  //在子物体中查找指定组件
 ```
 
-> **注意**：GetComponentsInChildren 会将父物体的 Transform 也一同获取。
+> **注意**：GetComponentsInChildren 会将父物体的 Transform 也一同获取，要从1开始遍历
+>
+> Transform 组件查找子物体身上的 Transform 组件：
+>
+> <1>常用格式：
+>
+> m_Transform.GetComponentsInChildren<Transform>()
+>
+> 这个 API 默认会查找所有的子物体，**包括孙子级别**的子物体。且这个 API 不会查找到隐藏的游戏物体。
+>
+> <2>重载格式：
+>
+> m_Transform.GetComponentsInChildren<Transform>(bool)
+>
+> 该方法有一个重载形式，bool 类型，如果填写 true，则该 API 可以查找到隐藏的子物体。
 
 ### 5.6.更改角色面部朝向
 
 ```csharp
 [void] LookAt(Vector3); //看向输入位置
+```
+
+### 5.7.绕某个点旋转
+
+```csharp
+[void]RotateAround(Boss 位置, Y 轴, 角度)；
 ```
 
 
@@ -851,3 +871,6 @@ Socket socket = new Socket(地址类型，Socket 类型，协议类型);
 Socket 类型：使用流式类型，SocketType.Stream
 
 协议类型：使用 TCP 协议类型，ProtocolType.Tcp
+
+
+
