@@ -398,6 +398,14 @@ new WaitForSeconds(float)   //延迟等待x秒.
 > m_Transform.GetComponentsInChildren<Transform>(bool)
 >
 > 该方法有一个重载形式，bool 类型，如果填写 true，则该 API 可以查找到隐藏的子物体。
+>
+> 
+>
+> **如果我们只想查找获取“儿子级别”的子物体，应该如何操作?**
+>
+> m_Transform.childCount:获取当前游戏物体子物体的个数
+>
+> m_Transform.GetChild(i):以角标的形式获取子物体
 
 ### 5.6.更改角色面部朝向
 
@@ -822,6 +830,18 @@ API：
 
 > 参数：RectTransform.Axis.Horizontal/Vertical ：对应宽和高.
 
+#### 修改UI的位置（偏移量）
+
+```csharp
+[Vector2]offsetMin
+
+[Vector2]offsetMax
+
+//RectTransform.offsetMin = new Vector2(Left, Bottom)；
+//RectTransform.offsetMax = new Vector2(Right, Top)。
+//【EG】GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
+```
+
 
 
 ### 4.Button
@@ -835,7 +855,7 @@ API：
 
 ### 5.eventData
 
-#### 注意:必须导入命名空间`using UnityEngine.EventSystems;`改属性是对应接口的参数（IBeginDragHandler, IDragHandler, IEndDragHandler）
+**注意:必须导入命名空间using UnityEngine.EventSystems;改属性是对应接口的参数（IBeginDragHandler, IDragHandler, IEndDragHandler）**
 
 #### 得到鼠标指针最终停留所在的游戏物体
 
