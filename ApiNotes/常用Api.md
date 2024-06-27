@@ -548,11 +548,31 @@ new WaitForSeconds(float)   //延迟等待x秒.
 
 
 
-## 17.Resources
+## 17.资源加载 Application
+
+### Resources
 
 ```c#
 [s][T] Load<T>(string)            //指定文件路径,加载单个资源.
 [s][T[]] LoadAll<T>(string)       //指定文件夹路径,加载多个资源.
+```
+
+### persistentDataPath
+
+```csharp
+[string]Application.persistentDataPath
+```
+
+### streamingAssetsPath
+
+```Csharp
+[string]Application.streamingAssetsPath,
+```
+
+### 目前是否是编译器，不是打包后
+
+```csharp
+[bool]Application.isEditor 
 ```
 
 
@@ -893,4 +913,287 @@ Socket 类型：使用流式类型，SocketType.Stream
 协议类型：使用 TCP 协议类型，ProtocolType.Tcp
 
 
+
+# lua
+
+## 基础语法
+
+### 获取一个变量的类型
+
+```lua
+type()
+```
+
+
+
+## 字符串
+
+### 字母大小写转换
+
+```lua
+string.upper( 字符串变量 )：字母全部转大写格式；
+
+string.lower( 字符串变量 )：字母全部转小写格式；
+```
+
+
+
+### 字符串反转
+
+```lua
+string.reverse( 字符串变量 )：将字符串进行位置反转。
+```
+
+
+
+### 字符串长度
+
+```lua
+string.len( 字符串变量 )：返回字符串的长度. 
+```
+
+**注意：单个字母，数字，符号长度都为 1；单个汉字长度为 2。**
+
+### 字符串替换
+
+```lua
+string.gsub（原始字符串，旧字符串，新字符串，[替换次数]）
+```
+
+在原始字符串中查找旧字符串，如果找到了，就用新字符串把旧的替换掉；替换次数可以不写，则表示全部替换。
+
+### 字符串格式化
+
+```lua
+string.format（）
+```
+
+**string.format（字符串格式，变量 1，变量 2，变量 N）**
+
+- %s：代表字符串. 
+
+- %d：表示一个整数数字
+
+- %f：表示一个小数
+
+  **保留有效小数位数：%0.1f，0.1 是保留 1 位小数，%0.2f 是保留两位小数；**
+
+  **e.g:**
+
+```lua
+print(string.format("显示：%0.1f",0.898989))
+```
+
+## table 表
+
+### **增加元素**
+
+```lua
+table.insert(表名, [位置], 值)
+```
+
+往指定的位置增加元素，如果不写位置，默认往最后一个位置增加。
+
+这个方式适合“数组模式”，不太适合“键值对模式”。
+
+键值对就用：表名[‘键’] = 值 的方式添加即可。
+
+### 移除元素
+
+```lua
+table.remove(表名, [位置])
+```
+
+如果不写位置，默认移除最后一个元素，如果位置值超出范围，不会报错，也不
+
+会有元素被移除。
+
+这个方式适合“数组模式”，不能用于“键值对模式”。
+
+键值对就用：表名[‘键’] = nil 的方式移除即可。
+
+### table 长度
+
+```lua
+table.getn(表名)
+```
+
+返回 table 表的长度。
+
+这个方式适合“数组模式”，不能用于“键值对模式”。
+
+键值对就用：迭代器迭代，然后累加一个变量的方式获得长度。
+
+## Metatable 元表
+
+### 关联两个表[将表 B 设置成表 A 的元表]，需要用一个新的函数：
+
+```lua
+setmetatable(表 A, 表 B) [见图]
+```
+
+### 是否存在元表
+
+```lua
+getmetatable(表名)
+```
+
+如果表名有元表，就返回元表的类型和地址；如果没有元表，则返回一个 nil。
+
+## 引入资源
+
+### require
+
+```lua
+require("path") --引入指定模块.
+require "path"
+```
+
+
+
+### dofile (引入整个lua文件)
+
+```lua
+dofile("path")
+--dofile("..\\myp\\Person.lua")
+```
+
+## LuaInterface（c#中调用lua）
+
+> using LuaInterface;
+
+###  实例化一个lua解析器对象
+
+```csharp
+Lua lua = new Lua();
+```
+
+###  变量的声明与访问.
+
+```csharp
+lua.DoString("LuaScripts")
+//lua.DoString("name = 'Monkey' age = 72 address = 'BeiJing'");
+```
+
+### 读取Lua文件
+
+```csharp
+lua.DoFile("LuaFile");
+//lua.DoFile("Monkey.lua");
+```
+
+### 获取各个类型数据
+
+```csharp
+string webName = lua.GetString("webName");
+double num = lua.GetNumber("num");
+LuaFunction LuaHello = lua.GetFunction("LuaHello");
+LuaHello.Call();
+```
+
+## luanet （Lua 内访问 C#代码 ）同文件夹下
+
+```lua
+--导入luanet.dll，语法格式：require “luanet”
+require "luanet"
+
+--获取程序集，语法格式：luanet.load_assembly（“程序集名”）
+luanet.load_assembly("three")
+luanet.load_assembly("System")
+
+--获取类型，语法格式：变量名= luanet.import_type（“程序集名.类名”）
+Calc = luanet.import_type("three.Calc")
+Console = luanet.import_type("System.Console")
+```
+
+## AssetBundle	
+
+### 打包
+
+```csharp
+BuildPipeline.BuildAssetBundles(路径, 选项, 平台);
+```
+
+参数分析：
+
+- BuildAssetBundles：打包所有设置了 AssetLabels 的资源；
+
+- 路径：打包出来的 AssetBundle 文件存放的位置；
+- 选项：设置 AssetBundle 打包过程中的选项，None 表示忽略该选项；
+- 平台：AssetBundle 是平台之间不兼容的，IOS，Android 是两套资源；
+
+### 打包压缩选项
+
+```csharp
+BuildAssetBundleOptions.None
+```
+
+使用 LZMA 压缩算法进行压缩，打包后的资源体积最小。
+
+```csharp
+BuildAssetBundleOptions.UncompressedAssetBundle
+```
+
+不使用压缩方式，打包后的 AssetBundle 体积最大，但是加载速度最快。
+
+```csharp
+BuildAssetBundleOptions.ChunkBasedCompression
+```
+
+使用 LZ4 压缩算法进行压缩，打包后的 AssetBundle 体积和加载速度介于二者之间。
+
+### 加载 AB 资源到内存
+
+```csharp
+AssetBundle ab = AssetBundle.LoadFromFile("AB 包完整路径")
+```
+
+从一个完整的路径位置加载 AB 资源包到内存，返回一个 AssetBundle 对象. 
+
+### 从 AB 资源中获取资源
+
+```csharp
+T resName = ab.LoadAsset<T>("游戏资源名称")
+```
+
+通过获取到的 AssetBundle 对象的“加载资源”方法，从 AssetBundle 对象内获取对应的游戏物体资源，并且返回该资源. 
+
+**备注：这句话的效果类似于使用 Resources.Load 加载一个资源.**
+
+
+
+
+
+# C#
+
+## iO
+
+- path : 文件路径
+
+### 读取文件
+
+```csharp
+[string]File.ReadAllText(string path);
+```
+
+### 删除文件
+
+```csharp
+[void]File.Delete(path);
+```
+
+### 写入文件
+
+```csharp
+StreamWriter sw = new StreamWriter(path);
+[void]sw.Write(str);
+[void]sw.Close();
+```
+
+### 变量组合成路径
+
+```csharp
+[string]Path.Combine(Application.streamingAssetsPath, fileName + ".txt")
+ //项目位置/Assets/StreamingAssets\{fileName}.txt
+```
 

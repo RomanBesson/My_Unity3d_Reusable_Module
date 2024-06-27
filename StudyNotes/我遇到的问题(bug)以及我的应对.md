@@ -192,6 +192,74 @@ Mask（剔除遮挡）属性来设置。该属性设置了摄像机能看到那�
 
 使用Resources反复存储读取json时，会有缓存出现，引起的数据不同步情况，这时候用io读写就好了。
 
+## 11.使用io读写resources里的文件，打包后找不到路径怎么办？
+
+### gpt的处理方式
+
+在Unity中，使用 `Resources` 文件夹来存储数据（如JSON文件）确实可以方便地在开发过程中访问这些资源，但确实存在一些潜在的问题，包括数据不同步的情况。这是因为 `Resources` 文件夹中的资源在构建后会被Unity打包到最终的发布包中，而不会反映在 `Resources` 文件夹中的任何更改。
+
+如果你在开发过程中修改了 `Resources` 文件夹中的JSON文件，这些更改不会自动反映到构建后的应用中。因此，如果你在开发过程中频繁修改这些数据文件，可能会导致数据不同步的问题。
+
+为了解决这个问题，你可以采取以下几种策略：
+
+1. **使用 `Resources.UnloadUnusedAssets`**：
+    在加载新的数据之前，调用 `Resources.UnloadUnusedAssets` 方法可以卸载不再使用的资源，包括之前加载的JSON数据。这样可以确保下次加载时，Unity会从 `Resources` 文件夹中读取最新的数据。
+
+    ```csharp
+    Resources.UnloadUnusedAssets();
+    ```
+
+2. **使用 `Resources.Load` 时指定资源的版本**：
+    如果你担心数据不同步，可以在加载资源时指定资源的版本号或时间戳，这样可以确保加载的是最新的资源。
+
+    ```csharp
+    TextAsset jsonData = Resources.Load<TextAsset>("jsonData/myDataFile", typeof(TextAsset));
+    ```
+
+3. **将数据文件放在 `StreamingAssets` 文件夹**：
+    将数据文件放在 `StreamingAssets` 文件夹中，然后在构建后通过 `Application.streamingAssetsPath` 访问这些文件。这样，你可以直接修改这些文件，并且在构建后这些更改会被包含在最终的发布包中。
+
+    ```csharp
+    string filePath = Path.Combine(Application.streamingAssetsPath, "myDataFile.json");
+    string jsonData = File.ReadAllText(filePath);
+    ```
+
+4. **使用 `AssetBundle`**：
+    如果你希望更灵活地管理资源，可以考虑使用 `AssetBundle`。`AssetBundle` 允许你将资源打包成独立的包，然后在运行时动态加载这些包。这样，你可以随时更新 `AssetBundle` 而不影响主应用。
+
+    ```csharp
+    AssetBundle myAssetBundle = AssetBundle.LoadFromFile("path/to/your/assetbundle");
+    TextAsset jsonData = myAssetBundle.LoadAsset<TextAsset>("myDataFile");
+    ```
+
+5. **使用数据库或文件系统**：
+    对于需要频繁更新的数据，使用数据库或文件系统来存储数据可能是一个更好的选择。这样，你可以直接在运行时更新数据，而不需要重新构建应用。
+
+选择哪种策略取决于你的具体需求和项目情况。如果你的数据更新频率不高，使用 `Resources` 文件夹可能足够。如果数据更新频繁，考虑使用 `StreamingAssets` 文件夹或 `AssetBundle` 可能更合适。对于需要频繁更新的数据，使用数据库或文件系统可能是最佳选择。
+
+### 解决方法
+
+我们采用第二种方法，把文件存储到 StreamingAssets文件夹里（可以读写）。
+
+1. 在 Assets下创建 StreamingAssets文件夹。
+2. 路径使用  `Path.Combine(Application.streamingAssetsPath, fileName + ".txt");`
+
+问题解决。
+
+### DLC：关于 persistentDataPath（把数据存储到AppData文件夹下）
+
+`Application.persistentDataPath` 是Unity提供的一个属性，它返回一个字符串，表示应用程序的持久化数据目录的路径。这个目录是应用程序用来存储用户数据、游戏进度等持久化信息的地方。在不同的平台上，这个目录的路径是不同的，例如：
+
+- 在iOS上，它通常位于 `Documents` 文件夹。
+- 在Android上，它可能位于 `Android/data/你的应用包名/files` 目录。
+- 在Windows上，它可能位于 `C:\Users\用户名\AppData\LocalLow\你的应用包名` 目录。
+
+关于 `Application.persistentDataPath` 打包时是否会被Unity压缩，答案是：不会。`Application.persistentDataPath` 指向的目录是应用程序的持久化数据目录，这个目录是用于存储应用程序运行时生成的数据，如用户设置、游戏进度等。这些数据需要在应用程序运行时被访问和修改，因此Unity不会对这个目录进行压缩。
+
+然而，Unity在构建应用程序时会对 `Resources` 文件夹中的资源进行压缩。`Resources` 文件夹中的资源在构建时会被Unity打包到最终的应用程序包中，以减少应用程序的大小。这些资源在运行时可以通过 `Resources.Load` 方法加载。
+
+总结来说，`Application.persistentDataPath` 指向的目录是用于存储应用程序的持久化数据，这些数据不会被Unity压缩。而 `Resources` 文件夹中的资源在构建时会被Unity压缩，以减少应用程序的大小。
+
 # 动画
 
 ## 1.空物体放到人物模型下方，模型运动，空物体并不会跟随动作改变位置，怎么办？
@@ -225,3 +293,15 @@ Mask（剔除遮挡）属性来设置。该属性设置了摄像机能看到那�
 ①Window --> Lighting --> Settings 打开灯光烘焙面板；
 
 ②取消最下方的自动烘焙复选框，然后手动点击右侧的烘焙按钮。
+
+# Lua
+
+## 1.Scite 配置字体大小
+
+①Options-->Open Global Options File，打开全局配置文件；
+
+②第 10 行代码，**ont.base=font:xxxxxx,size:xx** 修改成需要的字体字号。
+
+**注意事项：**
+
+要修改 SciTE 的配置文件时，在打开 SciTE 的时候需要右键-->以管理员身份运行，如果不是管理员身份运行，你修改
