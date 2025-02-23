@@ -6,6 +6,8 @@
 
 1. **；**可有可无
 2. 数组角标是从1开始
+3. Lua 语言中实例对象调用自身的方法要用`：`号，静态变量或者属性用`.`
+4. Lua 语言中的小数不需要加“f”后缀。
 
 
 
@@ -870,3 +872,306 @@ Application.streamingAssetsPath + "fileName"
 ```
 
 **StreamingAssets** 文件夹不会被压缩，所以可以储存一些需要更新的加载文件，或者是一些需要存在本地的json数据。使用的时候需要在 **Assets **文件夹下创建 **StreamingAssets** 文件夹。
+
+
+
+### AssetBundle 使用场景：从服务器端下载AssetBundle 资源并且使用
+
+#### 获取服务器中的资源
+
+先引入网络相关命名空间。
+
+```csharp
+using UnityEngine.Networking;
+```
+
+创建一个获取 AssetBundle 文件的 web 请求. 
+
+```csharp
+UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(url);
+```
+
+发送这个 web 请求. 
+
+```csharp
+yield return request.Send();
+```
+
+从 web 请求中获取内容，会返回一个 AssetBundle 类型的数据. 
+
+```csharp
+AssetBundle ab = DownloadHandlerAssetBundle.GetContent(request);
+```
+
+从这个“目录 AssetBundle”中获取 manifest 数据. 
+
+```csharp
+AssetBundleManifest manifest = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+```
+
+获取这个 manifest 文件中所有的 AssetBundle 的名称信息.
+
+```csharp
+string[] assets = manifest.GetAllAssetBundles();
+```
+
+ 
+
+#### **服务器端下载所有文件**
+
+通过获取到的 AssetBundle 对象获取内部所有的资源的名称，返回一个数组. 
+
+```csharp
+string[] names = ab.GetAllAssetNames();
+```
+
+截取路径地址中的文件名，且无后缀名. 需要引入 System.IO 命名空间
+
+```csharp
+[string]Path.GetFileNameWithoutExtension(path)
+```
+
+### 将服务器中的AssetBundle资源下载到本地 
+
+#### WWW 下载资源
+
+通过 WWW 类创建一个 web 请求，参数填写 AssetBundle 的 url 下载地址. 
+
+```csharp
+WWW www = new WWW(url);
+```
+
+将对象作为数据返回，这个 www 对象就是请求(下载）来的数据. 
+
+```csharp
+yield return www;
+```
+
+一个属性，表示下载状态是否完毕. 
+
+```csharp
+[bool]www.isDone 
+```
+
+再使用 if 语句块判断，当这个属性为真时，就可以使用 IO 技术把这个 www 对象作为AssetBundle 存储到本地。
+
+#### IO 存储资源
+
+创建一个文件信息对象. 
+
+```csharp
+FileInfo fileInfo = new FileInfo(文件完整路径+名称);
+```
+
+通过文件信息对象的“创建”方法，得到一个文件流对象. 
+
+```csharp
+FileStream fs = fileInfo.Create();
+```
+
+通过文件流对象，往这个文件内写入信息. 
+
+```csharp
+fs.Write(字节数组, 开始位置, 数据长度);	
+```
+
+文件写入存储到硬盘，关闭文件流对象，销毁文件对象.
+
+```csharp
+fs.Flush();
+
+fs.Close();
+
+fs.Dispose();
+```
+
+> 具体案例见`ExampleScripts/Lua`文件夹下的 `DownLoadAssetBundle.cs`文件。
+
+# Xlua框架
+
+## 基础介绍环境搭建
+
+XLua 是腾讯开发分享出来的一个开源项目，主要用于 Unity 项目的热更新。
+
+XLua 地址：https://github.com/Tencent/xLua
+
+**XLua 分两个版本：**
+
+- 完整版->用于学习和研究[Clone or download->download ZIP]；
+- 开发版->用于项目的实际开发[releases->Downloads]。
+
+### XLua 资源结构
+
+#### Assets 资源
+
+**Plugins：XLua 在各个平台运行需要使用到的 dll 库文件；**
+
+XLua：XLua 核心文件夹；
+
+**Doc：教程文档；**
+
+Examples：XLua 官方自带示例工程；
+
+**Resources：资源文件夹；**
+
+**Scr：XLua 源码；**
+
+Tutorial：教程示例场景；
+
+#### 其他资源[源码]
+
+build：支持库文件的源码；
+
+docs：文档；
+
+General：是 Tools 工具的源码；
+
+Test：测试工程；
+
+**Tools：工具；**
+
+WebGLPlugins：webGL 支持库源码；
+
+> 上面介绍的资源结构是 XLua 完整版所有的资源结构；**加深标示出来的是开发版具备的资源；**
+
+**项目中使用XLua只需要将Plugins和XLua两个文件夹拷贝到U3D中即可**
+
+## c#和lua的互相调用
+
+**将 XLua 中的 Plugins 和 XLua 文件夹拷贝到项目中；**
+
+### C#调用 Lua
+
+#### C#代码内执行 Lua 代码
+
+```csharp
+LuaEnv luaEnv = new LuaEnv();
+
+luaEnv.DoString("print('mkcode')");
+```
+
+**注意事项：**
+
+①需要引入 XLua 的命名空间：**using XLua;**
+
+②在 XLua 中，运行 Lua 代码的虚拟机是 LuaEnv；
+
+**③一个 LuaEnv 实例就是一个 Lua 虚拟机，出于开销的考虑，建议全局唯一。**
+
+#### C#调用外部的 Lua 代码文件
+
+①在` Xlua/Resources `文件夹下**创建一个 lua 文件，文件的后缀是 txt**；XLua 中完整的 Lua 文件名格式如下：fileName.lua.txt。
+
+②然后在 C#代码中用 Lua 虚拟机的 DoString 方法加载执行该 lua 文件；
+
+```csharp
+luaEnv.DoString("require 'fileName'")
+```
+
+#### C#获取 Lua 代码中的数据
+
+```csharp
+//获取 lua 中数值. 
+luaEnv.Global.Get<int>("a"); 
+
+//获取 lua 中字符串.
+luaEnv.Global.Get<string>("b"); 
+
+ //获取 lua 中布尔. 
+luaEnv.Global.Get<bool>("c"); 
+
+//获取 lua 中方法.
+luaEnv.Global.Get<LuaFunction>("D"); //执行用Call
+```
+
+### Lua 调用 C#
+
+```lua
+//获取 C#中的类. 
+CS.UnityEngine.GameObject 
+
+//获取 C#中的方法. 
+CS.UnityEngine.Debug.Log() 
+
+//获取 C#中的方法.
+CS.UnityEngine.GameObject.Find() 
+```
+
+**注意事项：Lua 调用 C#，需要在 C#的命名空间之前要加前缀：“CS.”。**
+
+## 热更新 HotFix 热补丁
+
+### 配置HotFix 
+
+#### 添加宏信息
+
+File--> Build Settings... --> Player Settings...--> Other Settings--> Script Compliation --> ConfigurationScripting Define Symbols：**HOTFIX_ENABLE**
+
+**之后顶部就会由xlua的显示。**
+
+#### 执行菜单生成命令
+
+XLua->Generate Code，该命令执行完毕后会生成一堆 Wrap 文件，存放到 XLua/Gen 文件夹下。
+
+#### 执行菜单注入命令
+
+XLua->Hotfix Inject In Editor，成功之后，会在控制台输出：“hotfix inject finish!”或者“had injected!”。
+
+> **Bug：如果出现红色警告提示“please install the Tools”，就需要把 Tools 文件夹拷贝到项目中，和 Assets 文件夹同级别位置。**
+
+**完成这三步操作，HotFix 的开发环境就配置完毕了。**
+
+### 热更新的使用
+
+####  HotFix 特性标签
+
+在使用 C#语言开发项目时，需要后续进行“热补丁修复”的类，需要在类的头部添加一个特性标签：[Hotfix]，表示该类可以被 XLua 热修复。
+
+#### Hotfix 语法
+
+```csharp
+xlua.hotfix(CS.类名, '方法名', lua 方法)
+```
+
+说明：这个是 lua 代码结构，需要使用 Lua 虚拟机对象中的 DoString 方法执行。含义就是：某个类中的某个方法，你用 lua 方法进行修复。
+
+> 注意：
+>
+> 1. **我们每次修改完毕 C#，都需要执行一次“注入命令”；**
+> 2. 有参方法修复时，需要传递当前脚本对象 this，在 lua 中用 self 代替。
+
+#### DLC: Lua 访问 C#脚本内的私有字段
+
+##### 方法一：改成公有然后用self访问
+
+可以在 lua 代码内通过“self.字段名”进行访问，但是这样有一个前提，就是该字段必须是 public 修饰的，private 修饰的访问不到。
+
+**但是这样有一个弊端，破坏了 C#语言本身的“封装性”。**
+
+##### 方法二：在 lua 语言中，使用代码获取 C#类中 private 成员的访问权（推荐）
+
+```csharp
+xlua.private_accessible(CS.类名)
+```
+
+加上这句话，就可以在 Lua 脚本中访问到 C#类当中的私有成员，同时不会破坏 C#原有的封装性和逻辑关系。
+
+例如：
+
+```lua
+xlua.private_accessible(CS.CreateWall)
+xlua.hotfix(CS.CreateWall, 'CreateCubeWall', function(self)
+	for i = 0, 1, 1 do
+		for j = 0, 1, 1 do
+			GameObject.Instantiate(self.prefab_Cube, Vector3(i, j, 0), Quaternion.identity);
+		end
+	end
+	print(self.webURL)
+end)
+
+```
+
+之后就可以使用c#类 `CreateWall`的私有字段了。 
+
+
+

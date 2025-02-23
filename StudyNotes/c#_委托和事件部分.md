@@ -408,9 +408,9 @@ public class ActionDemo : MonoBehaviour {
 
 
 
-### 4.2.Action
+### 4.2.Func
 
-Action 是一个有返回值的内置委托类型；
+Func是一个有返回值的内置委托类型；
 
 **使用示例：**
 

@@ -240,13 +240,17 @@ git merge "你要合并的分支名"
 
 
 
-### 2.6.延迟调用 Invoke()
+### 2.6.延迟调用 Invoke() 
 
 ```c#
 [void] Invoke(string, float)	    //延迟调用,延迟x秒,调用某方法.
 [void] InvokeRepeating(string, float, float)	 //延迟并重复调用.
 [void] CancelInvoke()	          //取消当前脚本中所有的延迟调用.
 [void] CancelInvoke(string)	    //取消当前脚本中指定的延迟调用.
+// 在5秒后调用isActive方法
+// Invoke("isActive", 5f, gameObject);
+// 在5秒后调用isActive方法，并且在调用后再次延迟5秒
+// InvokeRepeating("isActive", 5f, 5f, gameObject);
 ```
 
 
@@ -1106,7 +1110,7 @@ Calc = luanet.import_type("three.Calc")
 Console = luanet.import_type("System.Console")
 ```
 
-## AssetBundle	
+## AssetBundle
 
 ### 打包
 
@@ -1160,9 +1164,51 @@ T resName = ab.LoadAsset<T>("游戏资源名称")
 
 **备注：这句话的效果类似于使用 Resources.Load 加载一个资源.**
 
+### 从服务器下载，导入AssetBundle 的相关api
 
+#### 网络相关命名空间。
 
+```csharp
+using UnityEngine.Networking;
+```
 
+#### 创建一个获取 AssetBundle 文件的 web 请求. 
+
+```csharp
+UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(url);
+```
+
+#### 发送web 请求. 
+
+```csharp
+yield return request.Send();
+```
+
+#### 从 web 请求中获取内容，返回一个 AssetBundle 类型的数据. 
+
+```csharp
+AssetBundle ab = DownloadHandlerAssetBundle.GetContent(request);
+```
+
+#### 从这个“目录 AssetBundle”中获取 manifest 数据. 
+
+```csharp
+AssetBundleManifest manifest = ab.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+```
+
+#### 获取这个 manifest 文件中所有的 AssetBundle 的名称信息.
+
+```csharp
+string[] assets = manifest.GetAllAssetBundles();
+```
+
+#### **服务器端下载所有文件**
+
+通过获取到的 AssetBundle 对象获取内部所有的资源的名称，返回一个数组. 
+
+```csharp
+string[] names = ab.GetAllAssetNames();
+```
 
 # C#
 
@@ -1197,3 +1243,62 @@ StreamWriter sw = new StreamWriter(path);
  //项目位置/Assets/StreamingAssets\{fileName}.txt
 ```
 
+### 截取路径地址中的文件名，且无后缀名
+
+```csharp
+[string]Path.GetFileNameWithoutExtension(path)
+```
+
+### 创建一个文件信息对象
+
+```csharp
+FileInfo fileInfo = new FileInfo(文件完整路径+名称);
+```
+
+### 通过文件信息对象的“创建”方法，得到一个文件流对象. 
+
+```csharp
+FileStream fs = fileInfo.Create();
+```
+
+### 通过文件流对象，往这个文件内写入信息. 
+
+```csharp
+fs.Write(字节数组, 开始位置, 数据长度);
+```
+
+### 文件写入存储到硬盘
+
+```csharp
+fs.Flush();
+```
+
+### 关闭文件流对象
+
+```csharp
+fs.Close();
+```
+
+### 销毁文件对象
+
+```csharp
+fs.Dispose();
+```
+
+
+
+# WWW 
+
+### 创建一个 web 请求，参数填写文件的 url 下载地址. 
+
+```csharp
+WWW www = new WWW(url);
+//WWW www = new WWW("file://" + Application.streamingAssetsPath + "/luaFix.lua.txt");
+//要加上file://
+```
+
+### 是否下载完毕
+
+```csharp
+[bool]www.isDone 
+```
